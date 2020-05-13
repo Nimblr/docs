@@ -36,14 +36,9 @@ Retrieves a list of the calendars for this provider.
 Returns @Array[[Calendar]](#Calendar)
 
 ### #listEvents
-List calendar events. `showCancelled` may have a different behavior depending on the implementation
-as every provider managed cancelled/deleted events in a different way. That is why we add `showBumped`. In some
-cases they may be redundant and the implementation will adopt the most restrictive interpretation (meaning the one
-returning the least number of events).
+List calendar events. `showCancelled` may have a different behavior depending on the implementation as every provider manages cancelled/deleted events in a different way. That is why we add `showBumped`. In some cases they may be redundant and the implementation will adopt the most restrictive interpretation (meaning the one returning the least number of events).
 
-Note that if there is an error, all calendars should give status code via `statusCode`. If natively they do it
-some other way, then the calendar implementation must make sure that `statusCode` has the right status. We
-standarize around this name because it&#39;s the one Node uses.
+Note that if there is an error, all calendars should give status code via `statusCode`. If they do it natively in another way, it's mandatory that the calendar implemantation have the right status. `statusCode` it&#39;s a standard name in Node
 
 Returns @Array[[Event]](#Event)
 
