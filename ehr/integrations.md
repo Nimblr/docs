@@ -18,17 +18,17 @@ manipulate events that do not live inside Nimblr&#39;s realm but some other clou
 Name | Description
 --- | ---
 [`#listCalendars`](#listCalendars) | Retrieves a list of the calendars for this provider.
-[`#listEvents`](#listEvents) | List calendar events. `showCancelled` may have a different behavior depending on the implementation cases they may be redundant and the implementation will adopt the most restrictive interpretation (meaning the one returning the least number of events).
-[`#getEvent`](#getEvent) | Get event from calendar.
-[`#insertEvent`](#insertEvent) | Insert event into calendar
-[`#patchEvent`](#patchEvent) | Patches calendar event
+[`#listEvents`](#listEvents) | List calendar events. `showCancelled` may have different behavior depending on the implementation use cases. Calendars methods will adopt the most restrictive interpretation (minimum number of events).
+[`#getEvent`](#getEvent) | Get event from a calendar.
+[`#insertEvent`](#insertEvent) | Insert a new event into a calendar
+[`#patchEvent`](#patchEvent) | Modifies an existing event in a calendar
 [`#deleteEvent`](#deleteEvent) | Deletes event from calendar
-[`#listAvailableSlots`](#listAvailableSlots) | List all available calendar slots without retry. The returned slots should always be in chronological order.
-[`#searchContacts`](#searchContacts) | Get contacts that match the criteria
+[`#listAvailableSlots`](#listAvailableSlots) | List all available calendar slots, done only once. The returned slots will always be in chronological order.
+[`#searchContacts`](#searchContacts) | Get contacts with the matched criteria
 [`#getContact`](#getContact) | Get contact
-[`#insertContact`](#insertContact) | Insert contact that match the criteria
-[`#listEventTypes`](#listEventTypes) | List calendar event types. Each type will be different, but at a minimum they have two attributes: `id` and `name`
-[`#listLocations`](#listLocations) | List locations. Each type will be different, but at a minimum they have two attributes: `id` and `name`
+[`#insertContact`](#insertContact) | Insert contact with the matched criteria
+[`#listEventTypes`](#listEventTypes) | List calendar event types. Minimim attritubes needed: `id` and `name`
+[`#listLocations`](#listLocations) | List locations. Minimim attritubes needed: `id` and `name`
 
 ### #listCalendars
 Retrieves a list of the calendars for this provider.
@@ -36,9 +36,9 @@ Retrieves a list of the calendars for this provider.
 Returns @Array[[Calendar]](#Calendar)
 
 ### #listEvents
-List calendar events. `showCancelled` may have a different behavior depending on the implementation as every provider manages cancelled/deleted events in a different way. That is why we add `showBumped`. In some cases they may be redundant and the implementation will adopt the most restrictive interpretation (meaning the one returning the least number of events).
+List calendar events. `showCancelled` may have a different behavior depending on the implementation (every EHR manages cancelled/deleted events in different ways). `showBumped` handles the EHR's which don't use `showCancelled` method. Calendars methods will adopt the most restrictive interpretation (minimum number of events).
 
-Note that if there is an error, all calendars should give status code via `statusCode`. If they do it natively in another way, it's mandatory that the calendar implemantation have the right status. `statusCode` it&#39;s a standard name in Node
+Note: if there is an error, all calendars MUST give status code via `statusCode`.  It's mandatory that the calendar implemantation have the right status. `statusCode` it&#39;s a standard name in Node
 
 Returns @Array[[Event]](#Event)
 
@@ -50,13 +50,13 @@ Returns @[Event](#Event)
 
 ### #insertEvent
 
-Insert a new event into calendar.
+Insert a new event into the calendar.
 
 Returns @[Event](#Event)
 
 ### #patchEvent
 
-Update the details of the event (status, comments , etc).
+Update the variables of an event (status, comments , etc).
 
 Returns @[Event](#Event)
 
@@ -68,7 +68,7 @@ Returns @[Event](#Event)
 
 ### #listAvailableSlots
 
-List all available calendar slots without retry. The returned slots should always be in chronological order.
+List all available calendar's slots. The returned slots should always be in chronological order.
 
 Returns @[Slot](#Slot)
 
@@ -88,13 +88,13 @@ Insert contact that match the criteria
 Returns @[Contact](#Contact)
 
 ### #listEventTypes
-List calendar event types. Each type will be different, but at a minimum they have two attributes: `id` and `name`
+List calendar event types. Minimum attributes required: `id` and `name`
 
 Returns @Array[EventType]
 
 ### #listLocations
 
-List locations. Each type will be different, but at a minimum they have two attributes: `id` and `name`
+List locations. Minimum attributes required: `id` and `name`
 
 Returns @Array[Location]
 
@@ -102,18 +102,18 @@ Returns @Array[Location]
 
 #### Calendar
 
-A calendar is a facade to a real calendar (in Google Apps, SalesForce, SetMore, etc). A calendar has a (server) implementation that handles the heavy lifting of communicating with the real calendar via dependency injection.
+A calendar is a facade of a real calendar (in Google Apps, SalesForce, SetMore, etc). A calendar has a (server) implementation that handles the heavy lifting of communication with the real calendar via dependency injection.
 
 name | type | description | length
 --- | --- | --- | ---
-`selfEmail` | string | The email/id from the calendar owner. It is not easy to obtain via OAuth, so as soon as we see an event that has it, we grab it. | 256
-`name` | string | Calendar Name. It normally comes from the provide's name (Google calls it `summary`) | 128
+`selfEmail` | string | The email/id from the calendar owner. It is not easy to obtain it via OAuth. As soon as a new appt is created, we see and grab it. | 256
+`name` | string | Calendar Name. It normally comes from the provide's name (i.e. Google calls it `summary`) | 128
 `externalId` | string | Reference to the original calendar ID | 512
-`timeZone` | string | Time zone according to the IANA Time Zone Database name. | 128
+`timeZone` | string | Time zone according to the IANA Time Zone Database. | 128
 `provider` | string | The name of the implementation provider (i.e. Google, Salesforce, SetMore, etc) | 64
-`location` | string | Reference to the original location. Sometimes APIs require that this ID be passed back so we reserve a field for it. Google for example has free flowing text, Athena has the practice ID. . NOTE that this is not necessarly the same concept of location for events | 512
-`profile` | object | A contact associated with the calendar to store name, adresss, etc. Should follow Nimblr's contact structure.
-`selfOwned` | boolean | Whether the calendar is owned by the associated user or not. Important for system with calendar delegation.
+`location` | string | Reference to the original location. Sometimes APIs require that this ID passed back, in order to do that, we reserve a field for it. For example, Google has free flowing text, Athena has "practice ID". NOTE: This concept is not the same as locations | 512
+`profile` | object | A contact associated with the calendar. We store: name, adresss, etc. MUST follow Nimblr's contact structure.
+`selfOwned` | boolean | Whether the calendar is owned by the associated user or not. Important for EHR's with calendar delegation.
 
 
 #### Event
@@ -122,36 +122,36 @@ This is a transient model that describes the common schema for events that Nimbl
 
 name	|	type	|	description	|	length
 ---	|	---	|	---	|	---
-`externalId`| string	|	Reference to the original calendar event ID (Google for examples uses a longish UUID)	|	
-`prefix`	| string	|	A small prefix that tells the status of the event (icons that reflect progress)	|	16
-`summary`	| string	|	Event summary shown as the event title	|	
-`type`  	| string	|	Type of event. It's calendar provider specific, and it may not exist for some calendars (i.e. Google/Outlook). It may be the type of appointment (i.e. 'First Visit') or 'BLOCK' for blocking events	|	
+`externalId`| string	|	Reference to the original calendar event ID (For example, Google uses a longish UUID)	|	
+`prefix`	| string	|	A small prefix with event status (icons that reflect progress)	|	16
+`summary`	| string	|	Event summary shown as in the event title	|	
+`type`  	| string	|	Type of event. It's calendar provider specific. It may not exist for some calendars (i.e. Google/Outlook). It can also be appt type (i.e. 'First Visit') or 'BLOCK' for blocking slots	|	
 `location`	|	string	|	Event location	|
-`room`	|	string	|	Room identifier for the event (only for providers that have rooms)	|	32
-`color`	|	string	|	Event color. Note that the event colors used for now are: green, yellow and red. Each implementation will translate accordingly	|	16
-`description`	|	string	|	Longer description of the meeting	|	
-`organizer`	|	string	|	Email/ID of the organizer (it's the owner of the calendar)	|	
-`creator`	|	string	|	Email/ID of the creator (if the calendar has been delegated, then this will be the person that created the event)	|	
-`start`	|	date	|	DateTime when the meeting starts in UTC	|	
-`end`	|	date	|	DateTime when the meeting ends in UTC	|	
-`allDay`	|	boolean	|	This is a one (or multiple) all day event	|	
+`room`	|	string	|	Room identifier for the event (only for EHRs that manage "rooms" as calendars)	|	32
+`color`	|	string	|	Event color. Note that the event colors used for now are: green, yellow and red. Each implementation will map the colors accordingly	|	16
+`description`	|	string	| Full description of the meeting	|	
+`organizer`	|	string	|	Email/ID of the organizer (it's the Owner of the calendar)	|	
+`creator`	|	string	|	Email/ID of the creator (if the calendar has been delegated, the creator will be the person who created the event)	|	
+`start`	|	date	|	DateTime when the appt starts in UTC	|	
+`end`	|	date	|	DateTime when the appt ends in UTC	|	
+`allDay`	|	boolean	|	This is a one (or multiple) days with time duration of a complete day	|	
 `deleted`	|	boolean	|	True if the event has been deleted or cancelled by the organizer	|	
-`timeZone`	|	string	|	Time zone according to the IANA Time Zone Database name. If it is not present, then the calendar time zone |
-`contacts`	|	object	|	A map from email to contact (if embedded in the event itself)	|	
-`comments`	|	object	|	A map from email to comment (only for those attendees that have left comments)	|	
-`overlappable`	|	boolean	|	An indicator that this event can be overlapped with, so it should not block other events from being inserted	|	
+`timeZone`	|	string	|	Time zone according to the IANA Time Zone Database name. If it is not set, the calendar time zone will be used |
+`contacts`	|	object	|	Map from email to contact (if embedded in the event itself)	|	
+`comments`	|	object	|	Map from email to comment (only for those attendees that have left comments)	|	
+`overlappable`	|	boolean	|	An indicator that this event can be overlapped.	|	
 `created`	|	date	|	DateTime when the event was created	|	
-`modified`	|	date	|	DateTime when the event was created	|	
-`address`	|	string	|	Specific address of the event. Allows to override preferences and calendar address	|	
+`modified`	|	date	|	DateTime when the event was modified	|	
+`address`	|	string	|	 Event's address. Allows to override preferences and calendar address	|	
 `phone`	|	string	|	Specific phone of the event. Allows to override preferences and calendar phone	|	
-`url`	|	string	|	Contains the url for the video call	|
+`url`	|	string	|	Contains the url for a telemedicine appt|
 
 #### Slot
 name  |	type | description | length
 ---	  |	---	 | ---	       |	---
 `start` | date | DateTime when the slot starts |
 `end`   | date | DateTime when the slot ends |
-`room`  | String | Room identifier for the event (only for providers that have rooms) |
+`room`  | String | Room identifier for the event (only for providers handling rooms) |
 
 #### Contact
 
