@@ -3,8 +3,12 @@
 
 A facade for a *real* calendar
 
-The calendar module is really just a facade on top of real Calendar APIs. As such it will
-manipulate events that do not live inside Nimblr&#39;s realm but some other cloud.
+The calendar module is really just a facade simulating a real Calendar.  As such it will manipulate events that do not live anywhere inside Nimblr&#39;s.
+
+It&#39;s necessary that the real calendar is consulted frequently to have any update in the calendar (new appointments, cancellations, etc.) in the shortest possible time.
+
+Nimblr’s API is able to map any “external” object into a Nimblr’s object. An external object can be in JSON or XML format.
+
 
 ----
 ## Index
@@ -12,6 +16,8 @@ manipulate events that do not live inside Nimblr&#39;s realm but some other clou
 [`Methods`](#Methods-)
 
 [`Objects`](#Objects-)
+
+[`Method Request Example`](#Example-)
 
 ## Methods <!-- ========================================================== -->
 
@@ -174,3 +180,72 @@ name	|	type	|	description	|	length
 `language`	|	string	|	Language spoken by user in two letter codes (ISO639-1)	|	
 `created`	|	date	|	DateTime when the contact was created	|	
 `modified`	|	date	|	DateTime when the contact was created	|	
+
+## Example <!-- ========================================================== -->
+
+The following example shows a request from Nimblr’s API  and response external API using a getEvent method. The response can be in XML or JSON format.
+The response is processed by mapping the external object and convert it into an internal object.
+
+#### Request:
+```javascript
+{
+  id : "500ABCD001"
+}
+```
+
+#### Response:
+```javascript
+{
+    profile: "",
+    office: 0,
+    color: "#FF5733",
+    duration: 15,
+    appt_is_block: false,
+    id: "500ABCD001",
+    scheduled_time: "2020-05-30T12:00:00-0700",
+    doctor: 123456789,
+    status: "pending",
+    patient: 987654321,
+    clinic_room: 2,
+    overlap: false,
+    deleted_flag: false,
+    notes: "New Patient-First Appt",
+    timeZone : "America/New_York",
+    appt_created : "2020-04-15T17:23:00-0700",
+    appt_modified : "2020-04-15T17:23:00-0700",
+    creator_id : 123456789,
+    service_type : "AB11",
+    owner_id : 678912345
+}
+```
+
+
+#### Object Mapping
+
+Nimblr Property | External Object | Value
+--- | --- | ---
+`externalId` |  `id` | "500xABCD001"
+`prefix` |  ---  |  ---
+`summary` | --- | ---
+`type` | `service_type` | "ABCD1123"
+`location` | --- | ---
+`room` |  `clinic_room` | 2
+`color` | `color` | "#FF5733"
+`description` | --- | ---
+`organizer` | `owner_id` | 678912345
+`creator` | `creator_id` | 123456789
+`start` | `scheduled_time` | "2020-05-30T12:00:00-0700"
+`end` | `scheduled_time` + `duration` |  "2020-05-30T12:00:15-0700"
+`allDay` | --- | false
+`deleted` | `deleted_flag` | false
+`timeZone` | `timeZone` | "America/New_York"
+`contacts` | `patient` | 987654321
+`comments` | `notes` | "New Patient-First Appt"
+`overlappable` | `overlap` | false
+`created` | `appt_created` | "2020-04-15T17:23:00-0700"
+`modified` | `appt_modified` | "2020-04-15T17:23:00-0700"
+`address` | --- | ---
+`phone` |  --- | ---
+`url` |  --- | ---
+
+
