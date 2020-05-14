@@ -108,7 +108,7 @@ Returns @Array[Location]
 
 #### Calendar
 
-A calendar is a facade of a real calendar (in Google Apps, SalesForce, SetMore, etc). A calendar has a (server) implementation that handles the heavy lifting of communication with the real calendar via dependency injection.
+A calendar is a facade of a real calendar (in EHR's, Google Apps, SalesForce, etc). A calendar has a (server) implementation that handles the heavy lifting of communication with the real calendar via dependency injection.
 
 name | type | description | length
 --- | --- | --- | ---
