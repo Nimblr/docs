@@ -119,7 +119,7 @@ name | required | type | description | length
 `provider` | false | string | The name of the implementation provider (i.e. Google, Salesforce, SetMore, etc) | 64
 `location` | false | string | Reference to the original location. Sometimes APIs require that this ID passed back, in order to do that, we reserve a field for it. For example, Google has free flowing text, Athena has "practice ID". NOTE: This concept is not the same as locations | 512
 `profile` | false | object | A contact associated with the calendar. We store: name, adress, etc. MUST follow Nimblr's contact structure.
-`selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHR's with calendar delegation. Default 
+`selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHR's with calendar delegation. Default *true*
 
 
 #### Event
@@ -168,10 +168,10 @@ name	|	type	|	description	|	length
 `externalId` | true	|	string	|	Reference to the original contact object (Google for examples uses a longish UUID)	|	
 `name`	| true |	string	|	Full name for the contact	|	64
 `title`	| false |	string	|	Title for the contact (i.e. Mr, Mrs, Count, etc)	|	32
-`email`	| false |	string	|	Contact email. Default ""	|	128
+`email`	| false |	string	|	Contact email. Default *""*	|	128
 `firstName`	| true |	string	|	First Name	|	32
 `lastName`	| true |	string	|	Last Name	|	32
-`contactable`	| false |	boolean	|	Whether we have permission to contact this person. This is different from 'reachable' which is whether we could send a message to the phone number we have. Default true.	|	
+`contactable`	| false |	boolean	|	Whether we have permission to contact this person. This is different from 'reachable' which is whether we could send a message to the phone number we have. Default *true*.	|	
 `reachable`	| false	| boolean	|	Going in the premise we have permission to contact, were we able to reach this person?	|	
 `postalCode` | false	| string	|	Postal Code	|	32
 `mobile`	| true | string	|	Mobile phone number	|	64
