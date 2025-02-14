@@ -358,7 +358,7 @@ Nimblr Property | External Object | Value
 `url` |  --- | ---
 
 
-#### Conclusion
+## Conclusion <!-- ========================================================== -->
 
 The calendar module in Nimblr provides a robust and efficient way to integrate with external calendar systems, such as EHRs and Google Calendar. By acting as a facade, it simplifies the management of external events, ensuring real-time synchronization and seamless communication with external platforms. This integration not only reduces manual effort but also enhances the overall user experience by improving communication with patients and streamlining event management.
 
