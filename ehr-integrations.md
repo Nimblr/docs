@@ -173,6 +173,7 @@ name | required | type | description | length
 --- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original calendar event ID (e.g., Google uses a long UUID). |
 `calendar` | true | string | Reference to the original calendar ID. |
+`status` | true | string | Event status. It can be 'confirmed', 'tentative', 'cancelled', 'no-show', etc. Look at the table below | 32
 `prefix` | false | string | A small prefix with event status (icons that reflect progress). | 16
 `summary` | false | string | Event summary shown as the event title. |
 `type` | false | string | Type of event. It's calendar provider-specific. It may not exist for some calendars (e.g., Google/Outlook). It can also be event type (e.g., 'First Visit') or 'BLOCK' for blocking slots. |
@@ -188,13 +189,24 @@ name | required | type | description | length
 `deleted` | true | boolean | True if the event has been deleted or cancelled by the organizer. |
 `timeZone` | false | string | Time zone according to the IANA Time Zone Database name. If not set, the calendar time zone will be used. |
 `contacts` | true | object | Contact object or externalId of the Contact. |
-`comments` | false | object | Map from email to comment (only for those attendees that have left comments). |
+`comments` | false | object | Map from email to comment (only for those Contact that have left comments). |
 `overlappable` | true | boolean | An indicator that this event can be overlapped. |
 `created` | true | date | DateTime when the event was created. |
 `modified` | true | date | DateTime when the event was modified. |
 `address` | false | string | Event's address. Allows overriding preferences and calendar address. |
 `phone` | false | string | Specific phone number for the event. Allows overriding preferences and calendar phone. |
 `url` | false | string | Contains the URL for a virtual event. |
+
+status | description
+--- | ---
+ACCEPTED | Contact has been contacted and agreed to show up
+BUMPED | Event was cancelled by the organizer
+DECLINED | Contact has declined to attend
+NEEDS_ACTION | We have not contacted the Contact
+RESCHEDULED | Contact has expressed desire to reschedule
+TENTATIVE | We have started the contact process with the Contact
+UNPAID | Mask that prevents confirmation messages from being sent until an event is paid
+UNKNOWN | To use this status with certain calendars that don't support Contact status or as a default
 
 #### Slot
 name | required | type | description | length
@@ -219,10 +231,16 @@ name | required | type | description | length
 `contactable` | false | boolean | Whether we have permission to contact this person. This is different from 'reachable' which is whether we could send a message to the phone number we have. Default *true*. |
 `reachable` | false | boolean | Assuming we have permission to contact, were we able to reach this person? |
 `postalCode` | false | string | Postal Code. | 32
+`address` | false | string | Address. | 256
 `mobile` | true | string | Mobile phone number. | 64
 `work` | false | string | Work phone number. | 64
 `home` | false | string | Home phone number. | 64
 `language` | false | string | Language spoken by the user in two-letter codes (ISO639-1). |
+`ssn` | false | string | Social Security Number. | 32
+`dateOfBirth` | false | date | Date of Birth. |
+`insuranceName` | false | string | Name of the insurance company. | 64
+`insuranceNumber` | false | string | Insurance number. | 32
+
 
 #### EventType
 This is a transient model that describes the common schema for event types that Nimblr handles.
