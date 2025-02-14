@@ -2,6 +2,8 @@
 
 The calendar module in Nimblr acts as a facade for integrating with external calendar systems, such as EHRs or Google Calendar. It enables Nimblr to manage external events seamlessly, ensuring real-time synchronization and efficient communication with external platforms. This integration allows Nimblr users to manage external events efficiently, reducing manual effort and improving communication with patients.
 
+The calendar module acts as a facade simulating a real Calendar. It manipulates events that do not reside within Nimblr's system. Ensuring seamless synchronization and communication with external platforms.
+
 It is essential to frequently consult the real calendar to ensure updates (new events, cancellations, etc.) are reflected in the shortest possible time.
 
 Nimblr’s API can map any “external” object into a Nimblr object. An external object can be in JSON or XML format.
@@ -39,12 +41,13 @@ Name | Description
 [`#listOrganizers`](#listOrganizers) | Lists organizers. Minimum attributes needed: `id` and `name`.
 [`#getWaitlist`](#getWaitlist) | Retrieves the waitlist for a specific calendar.
 [`#deleteWaitlist`](#deleteWaitlist) | Deletes a patient from the waitlist.
+[`#uploadInsuranceCard`](#uploadInsuranceCard) | Uploads an insurance card photo for a contact.
+[`#getInsuranceCard`](#getInsuranceCard) | Retrieves the insurance card photo for a contact.
 
 ### #listCalendars
 Retrieves a list of calendars for this EHR.
 
-It is important to list the calendars, as they allow the system to use their definitions to manage events. Therefore, the system seeks to use the `externalId` of the calendar to retrieve the events.
-
+Listing the calendars is important, as it allows using their definitions to manage events. Therefore, the `externalId` of the calendar is used to retrieve the events.
 If events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
 
 Returns @Array[[Calendar]](#Calendar)
@@ -93,7 +96,7 @@ Returns @[Boolean](#Boolean)
 
 ### #listAvailableSlots
 Lists all available calendar slots in chronological order.
-To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. If organizers exist, can additionally obtain them by adding the `externalId` of the organizer and/or the event type in the query.
+To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. If organizers exist, they can additionally be obtained by adding the `externalId` of the organizer and/or the event type in the query.
 
 Returns @[Slot](#Slot)
 
@@ -137,19 +140,33 @@ The returned array of organizers can help in associating events when listing eve
 
 Returns @Array[[Organizer]](#Organizer)
 
-### #getWaitlist
+### #getWaitlist (Optional)
 This method retrieves the waitlist for a specific calendar.
 The waitlist is a list of patients who are waiting for an event. The waitlist can be used to offer open calendar slots to patients who are waiting for an earlier event.
 
-The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better we can offer to advance the event to the correct patient.
+The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better the offer to advance the event to the correct patient.
 
 Returns @Array[[Waitlist]](#Waitlist)
 
-### #deleteWaitlist
+### #deleteWaitlist (Optional)
 This method deletes a patient from the waitlist.
 This method is used to remove a patient from the waitlist after they have been booked for an event.
 
 Returns @[Boolean](#Boolean)
+
+### #uploadInsuranceCard (Optional)
+Uploads an insurance card photo for a contact.
+
+This method is used to upload a photo of the insurance card for a specific contact. The photo can be used for verification and record-keeping purposes.
+
+Returns @[Boolean](#Boolean)
+
+### #getInsuranceCard (Optional)
+Retrieves the insurance card photo for a contact.
+
+This method is used to retrieve the photo of the insurance card for a specific contact. It helps in verifying the insurance details of the contact.
+
+Returns @[String](#String)
 
 ## Objects <!-- ========================================================== -->
 
@@ -158,13 +175,13 @@ A calendar is a facade of a real calendar (in EHRs, Google Apps, Salesforce, etc
 
 name | required | type | description | length
 --- | --- | --- | --- | ---
-`selfEmail` | true | string | The email/id of the calendar owner. It is not easy to obtain via OAuth. As soon as a new event is created, we see and grab it. | 256
+`selfEmail` | true | string | The email/id of the calendar owner. It is not easy to obtain via OAuth. As soon as a new event is created, it is seen and grabbed. | 256
 `name` | true | string | Calendar Name. It usually comes from the organizer's name (e.g., Google calls it `summary`). | 128
 `externalId` | true | string | Reference to the original calendar ID. | 512
 `timeZone` | true | string | Time zone according to the IANA Time Zone Database. | 128
 `provider` | false | string | The name of the implementation provider (e.g., Google, Salesforce, SetMore, etc.). | 64
 `location` | false | string | Reference to the original location. Sometimes APIs require this ID to be passed back. For example, Google has free-flowing text, Athena has "practice ID". NOTE: This concept is not the same as locations. | 512
-`profile` | false | object | A contact associated with the calendar. The system stores information such as name, address, etc. This information MUST follow Nimblr's contact structure. |
+`profile` | false | object | A contact associated with the calendar. Stores: name, address, etc. MUST follow Nimblr's contact structure. |
 `selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHRs with calendar delegation. Default *true*. |
 
 #### Event
@@ -200,12 +217,14 @@ name | required | type | description | length
 
 status | description
 --- | ---
+NEEDS_ACTION | The Contact has not been contacted
+TENTATIVE | The contact process with the Contact has started
 ACCEPTED | Contact has been contacted and agreed to show up
 BUMPED | Event was cancelled by the organizer
 DECLINED | Contact has declined to attend
-NEEDS_ACTION | We have not contacted the Contact
 RESCHEDULED | Contact has expressed desire to reschedule
-TENTATIVE | We have started the contact process with the Contact
+NOSHOW | Contact did not show up for the event
+PAID | Event has been paid for by the Contact
 UNPAID | Mask that prevents confirmation messages from being sent until an event is paid
 UNKNOWN | To use this status with certain calendars that don't support Contact status or as a default
 
@@ -229,8 +248,9 @@ name | required | type | description | length
 `email` | false | string | Contact email. Default *""*. | 128
 `firstName` | true | string | First Name. | 32
 `lastName` | true | string | Last Name. | 32
-`contactable` | false | boolean | Whether we have permission to contact this person. This is different from 'reachable' which is whether we could send a message to the phone number we have. Default *true*. |
-`reachable` | false | boolean | Assuming we have permission to contact, were we able to reach this person? |
+`gender` | false | string | Gender of the contact. | 32
+`contactable` | false | boolean | Whether permission to contact this person is granted. This is different from 'reachable' which is whether a message could be sent to the phone number provided. Default *true*. |
+`reachable` | false | boolean | Assuming permission to contact is granted, whether this person could be reached. |
 `postalCode` | false | string | Postal Code. | 32
 `address` | false | string | Address. | 256
 `mobile` | true | string | Mobile phone number. | 64
@@ -241,6 +261,11 @@ name | required | type | description | length
 `dateOfBirth` | false | date | Date of Birth. |
 `insuranceName` | false | string | Name of the insurance company. | 64
 `insuranceNumber` | false | string | Insurance number. | 32
+`insuranceMemberId` | false | string | Insurance member ID. | 32
+`Pharmacy` | false | string | Pharmacy name. | 64
+`EmergencyContactName` | false | string | Emergency contact name. | 64
+`EmergencyContactMobile` | false | string | Emergency contact phone number. | 64
+`ReferedBy` | false | string | Name of the person who referred the contact. | 64
 
 
 #### EventType
@@ -296,7 +321,7 @@ name | required | type | description | length
 
 ## Example <!-- ========================================================== -->
 
-The following example demonstrates how an external event object is mapped to a Nimblr event object. The external object is in JSON format, and the system converts it into an internal object using the specified mapping rules.
+The following example shows how an external event object is mapped to a Nimblr event object. The external object is in JSON format, and the system converts it into an internal object using the specified mapping rules.
 
 #### Request:
 ```curl
