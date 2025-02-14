@@ -25,6 +25,7 @@ Name | Description
 --- | ---
 [`#listCalendars`](#listCalendars) | Retrieves a list of calendars for this EHR.
 [`#listEvents`](#listEvents) | Lists calendar events. `showCancelled` behavior may vary depending on the implementation. Calendar methods will adopt the most restrictive interpretation (minimum number of events).
+[`#listEventsByContact`](#listEventsByContact) | Lists calendar events by contact.
 [`#getEvent`](#getEvent) | Retrieves an event from a calendar.
 [`#insertEvent`](#insertEvent) | Inserts a new event into a calendar.
 [`#patchEvent`](#patchEvent) | Modifies an existing event in a calendar.
@@ -35,6 +36,9 @@ Name | Description
 [`#insertContact`](#insertContact) | Inserts a contact matching the criteria.
 [`#listEventTypes`](#listEventTypes) | Lists calendar event types. Minimum attributes needed: `id` and `name`.
 [`#listLocations`](#listLocations) | Lists locations. Minimum attributes needed: `id` and `name`.
+[`#listOrganizers`](#listOrganizers) | Lists organizers. Minimum attributes needed: `id` and `name`.
+[`#getWaitlist`](#getWaitlist) | Retrieves the waitlist for a specific calendar.
+[`#deleteWaitlist`](#deleteWaitlist) | Deletes a patient from the waitlist.
 
 ### #listCalendars
 Retrieves a list of calendars for this EHR.
