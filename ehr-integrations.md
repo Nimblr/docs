@@ -202,13 +202,13 @@ name | required | type | description | length
 `organizer` | true | string | Email/externalId of the provider (the Owner of the calendar). |
 `creator` | true | string | Email/externalId of the creator (if the calendar has been delegated, the creator will be the person who created the event). |
 `start` | true | date | DateTime when the event starts in UTC. |
-`end` | true | date | DateTime when the event ends in UTC. |
+`end` | true | date | DateTime when the event ends in UTC. If the end time does not exist, the duration is required to calculate the end time. |
 `allDay` | false | boolean | This is a one (or multiple) day event with a duration of a complete day. Default *false*. |
-`deleted` | true | boolean | True if the event has been deleted or cancelled by the organizer. |
+`deleted` | false | boolean | True if the event has been deleted or cancelled by the organizer. |
 `timeZone` | false | string | Time zone according to the IANA Time Zone Database name. If not set, the calendar time zone will be used. |
 `contacts` | true | object | Contact object or externalId of the Contact. |
 `comments` | false | object | Map from email to comment (only for those Contact that have left comments). |
-`overlappable` | true | boolean | An indicator that this event can be overlapped. |
+`overlappable` | false | boolean | An indicator that this event can be overlapped. |
 `created` | true | date | DateTime when the event was created. |
 `modified` | true | date | DateTime when the event was modified. |
 `address` | false | string | Event's address. Allows overriding preferences and calendar address. |
@@ -350,7 +350,8 @@ GET /ehr-api/provider/678912345/event/500ABCD001
     event_modified : "2025-02-15T17:23:00-0700",
     creator_id : 123456789,
     service_type : "AB11",
-    owner_id : 678912345
+    owner_id : 678912345,
+    status: "CONFIRMED"
 }
 ```
 
@@ -381,13 +382,7 @@ Nimblr Property | External Object | Value
 `address` | --- | ---
 `phone` |  --- | ---
 `url` |  --- | ---
-
-
-## Conclusion <!-- ========================================================== -->
-
-The calendar module in Nimblr provides a robust and efficient way to integrate with external calendar systems, such as EHRs and Google Calendar. By acting as a facade, it simplifies the management of external events, ensuring real-time synchronization and seamless communication with external platforms. This integration not only reduces manual effort but also enhances the overall user experience by improving communication with patients and streamlining event management.
-
-For further assistance or to implement these integrations, please refer to the official Nimblr API documentation or contact the Nimblr support team. We are here to help you make the most of this powerful feature.
+`status` | `status` => `internal status` | "ACCEPTED"
 
 ## Glossary <!-- ========================================================== -->
 
