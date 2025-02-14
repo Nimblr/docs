@@ -223,8 +223,6 @@ name | required | type | description | length
 `work` | false | string | Work phone number. | 64
 `home` | false | string | Home phone number. | 64
 `language` | false | string | Language spoken by the user in two-letter codes (ISO639-1). |
-`created` | true | date | DateTime when the contact was created. |
-`modified` | true | date | DateTime when the contact was modified. |
 
 #### EventType
 This is a transient model that describes the common schema for event types that Nimblr handles.
