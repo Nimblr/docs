@@ -1,5 +1,5 @@
-# Integrations
-==============================================================================
+# Integrations <!-- ========================================================== -->
+
 A facade for a *real* calendar
 
 The calendar module acts as a facade simulating a real Calendar. It manipulates events that do not reside within Nimblr's system.
@@ -119,21 +119,21 @@ Lists calendar event types.
 This method lists the types of calendar events available. It requires a minimum of two attributes: `externalId` and `name`.
 This can be used to map the services that the clinic directly provides within the Electronic Health Record (EHR) system.
 
-Returns @Array[EventType](#EventType)
+Returns @Array[[EventType]](#EventType)
 
 ### #listLocations
 This method lists locations, which can represent physical places such as offices or clinics.
 These locations are identified by their minimum required attributes: `externalId` and `name`.
 The returned array of locations can help in grouping events when listing events by calendar.
 
-Returns @Array[Location](#Location)
+Returns @Array[[Location]](#Location)
 
 ### #listOrganizers
 This method lists organizers, which can represent healthcare providers or treatment providers related to an event.
 These organizers are identified by their minimum required attributes: `externalId` and `name`.
 The returned array of organizers can help in associating events when listing events by calendar.
 
-Returns @Array[Organizer](#Organizer)
+Returns @Array[[Organizer]](#Organizer)
 
 ### #getWaitlist
 This method retrieves the waitlist for a specific calendar.
@@ -141,7 +141,7 @@ The waitlist is a list of patients who are waiting for an event. The waitlist ca
 
 The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better we can offer to advance the event to the correct patient.
 
-Returns @Array[Waitlist](#Waitlist)
+Returns @Array[[Waitlist]](#Waitlist)
 
 ### #deleteWaitlist
 This method deletes a patient from the waitlist.
