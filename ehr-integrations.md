@@ -1,8 +1,6 @@
 # Integrations <!-- ========================================================== -->
 
-A facade for a *real* calendar
-
-The calendar module acts as a facade simulating a real Calendar. It manipulates events that do not reside within Nimblr's system.
+The calendar module in Nimblr acts as a facade for integrating with external calendar systems, such as EHRs or Google Calendar. It enables Nimblr to manage external events seamlessly, ensuring real-time synchronization and efficient communication with external platforms. This integration allows Nimblr users to manage external events efficiently, reducing manual effort and improving communication with patients.
 
 It is essential to frequently consult the real calendar to ensure updates (new events, cancellations, etc.) are reflected in the shortest possible time.
 
@@ -10,6 +8,8 @@ Nimblr’s API can map any “external” object into a Nimblr object. An extern
 
 ----
 ## Index
+
+The following sections provide detailed information about the methods, objects, and examples available in the calendar module. Use the links below to navigate to the relevant section.
 
 [`Methods`](#Methods-)
 
@@ -43,7 +43,8 @@ Name | Description
 ### #listCalendars
 Retrieves a list of calendars for this EHR.
 
-It is important to list the calendars, as they allow us to use their definitions to manage events. Therefore, we seek to use the `externalId` of the calendar to retrieve the events.
+It is important to list the calendars, as they allow the system to use their definitions to manage events. Therefore, the system seeks to use the `externalId` of the calendar to retrieve the events.
+
 If events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
 
 Returns @Array[[Calendar]](#Calendar)
@@ -58,7 +59,7 @@ Returns @Array[[Event]](#Event)
 ### #listEventsByContact
 Lists calendar events by contact.
 
-This function allows to retrieve events for a specific contact within a specified time period.
+This function allows retrieving events for a specific contact within a specified time period.
 To retrieve events by contact, they must be queried by patient `externalId` within a specified time period.
 
 Returns @Array[[Event]](#Event)
@@ -81,7 +82,7 @@ Returns @[Event](#Event)
 ### #patchEvent
 Updates the variables of an event (status, comments, etc.).
 
-This method is used to update the status of an event. It is important to update the status of the event to reflect the confirmation, cancellation, reschedule results for the patient communication.
+This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling for patient communication.
 
 Returns @[Event](#Event)
 
@@ -163,7 +164,7 @@ name | required | type | description | length
 `timeZone` | true | string | Time zone according to the IANA Time Zone Database. | 128
 `provider` | false | string | The name of the implementation provider (e.g., Google, Salesforce, SetMore, etc.). | 64
 `location` | false | string | Reference to the original location. Sometimes APIs require this ID to be passed back. For example, Google has free-flowing text, Athena has "practice ID". NOTE: This concept is not the same as locations. | 512
-`profile` | false | object | A contact associated with the calendar. We store: name, address, etc. MUST follow Nimblr's contact structure. |
+`profile` | false | object | A contact associated with the calendar. The system stores information such as name, address, etc. This information MUST follow Nimblr's contact structure. |
 `selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHRs with calendar delegation. Default *true*. |
 
 #### Event
@@ -295,8 +296,7 @@ name | required | type | description | length
 
 ## Example <!-- ========================================================== -->
 
-The following example shows a request from Nimblr’s API and the response from an external API using the getEvent method. The response can be in XML or JSON format.
-The response is processed by mapping the external object and converting it into an internal object.
+The following example demonstrates how an external event object is mapped to a Nimblr event object. The external object is in JSON format, and the system converts it into an internal object using the specified mapping rules.
 
 #### Request:
 ```curl
@@ -358,10 +358,15 @@ Nimblr Property | External Object | Value
 `url` |  --- | ---
 
 
+#### Conclusion
+
+The calendar module in Nimblr provides a robust and efficient way to integrate with external calendar systems, such as EHRs and Google Calendar. By acting as a facade, it simplifies the management of external events, ensuring real-time synchronization and seamless communication with external platforms. This integration not only reduces manual effort but also enhances the overall user experience by improving communication with patients and streamlining event management.
+
+For further assistance or to implement these integrations, please refer to the official Nimblr API documentation or contact the Nimblr support team. We are here to help you make the most of this powerful feature.
 
 ## Glossary <!-- ========================================================== -->
 
-- **Facade**: A design pattern that provides a simplified interface to a complex subsystem.
+- **Facade**: A design pattern that provides a simplified interface to a complex subsystem, such as an external calendar system. It hides the complexity of the underlying system and provides a unified interface for interaction.
 - **Dependency Injection**: A design pattern in which an object receives other objects that it depends on.
 - **CalDAV**: A protocol used to access calendar data on a server.
 - **IANA Time Zone Database**: A database that provides time zone information.
@@ -379,3 +384,6 @@ Nimblr Property | External Object | Value
 - **Contact**: An individual whose information is stored and managed within the system.
 - **Event**: A scheduled occurrence in a calendar, such as an appointment or meeting.
 - **Calendar**: A system for organizing and managing events, often integrated with other systems like EHRs or Google Calendar.
+- **ExternalId**: A unique identifier used to reference an object (such as a calendar, event, or contact) in an external system. This ID ensures synchronization between Nimblr and external platforms like EHRs or Google Calendar.
+- **TimeZone**: A region-specific time standard that follows the IANA Time Zone Database. It is used to ensure that events and reminders are displayed in the correct local time for users.
+- **Event status**: A field that indicates the current state of an event, such as 'confirmed', 'cancelled', 'tentative', or 'no-show'. This status helps determine the appropriate communication flow with the patient.
