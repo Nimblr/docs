@@ -51,10 +51,7 @@ Returns @Array[[Calendar]](#Calendar)
 ### #listEvents
 Lists calendar events.
 
-Within the events, events for contacts must be perfectly mapped, containing all necessary information to process the communication with the patient.
-Important information includes the `externalId`, which is used to query patient information, and the event status, which indicates whether the event is canceled, the patient did not show up, or it is confirmed.
-This information helps initiate Holly's outbound flows.
-To retrieve events, they must be queried by calendar within a specified time period.
+Within the events, events for contacts must be perfectly mapped, containing all necessary information to process the communication with the patient. Important information includes the Contact `externalId`, which is used to query patient information, and the event status, which indicates whether the event is canceled, the patient did not show up, or it is confirmed. This information helps initiate Holly's outbound flows. To retrieve events, they must be queried by calendar `externalId` within a specified time period.
 
 Returns @Array[[Event]](#Event)
 
@@ -166,8 +163,8 @@ name | required | type | description | length
 `timeZone` | true | string | Time zone according to the IANA Time Zone Database. | 128
 `provider` | false | string | The name of the implementation provider (e.g., Google, Salesforce, SetMore, etc.). | 64
 `location` | false | string | Reference to the original location. Sometimes APIs require this ID to be passed back. For example, Google has free-flowing text, Athena has "practice ID". NOTE: This concept is not the same as locations. | 512
-`profile` | false | object | A contact associated with the calendar. We store: name, address, etc. MUST follow Nimblr's contact structure.
-`selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHRs with calendar delegation. Default *true*.
+`profile` | false | object | A contact associated with the calendar. We store: name, address, etc. MUST follow Nimblr's contact structure. |
+`selfOwned` | false | boolean | Whether the calendar is owned by the associated user or not. Important for EHRs with calendar delegation. Default *true*. |
 
 #### Event
 This is a transient model that describes the common schema for events that Nimblr handles. Notation is taken from CalDAV (see https://tools.ietf.org/html/rfc4791).
@@ -179,7 +176,7 @@ name | required | type | description | length
 `prefix` | false | string | A small prefix with event status (icons that reflect progress). | 16
 `summary` | false | string | Event summary shown as the event title. |
 `type` | false | string | Type of event. It's calendar provider-specific. It may not exist for some calendars (e.g., Google/Outlook). It can also be event type (e.g., 'First Visit') or 'BLOCK' for blocking slots. |
-`location` | false | string | Event location. |
+`location` | false | string | Event location externalId. |
 `room` | false | string | Room identifier for the event (only for EHRs that manage "rooms" as calendars). | 32
 `color` | false | string | Event color. Note that the event colors used for now are: green, yellow, and red. Each implementation will map the colors accordingly. | 16
 `description` | false | string | Full description of the meeting. |
@@ -190,7 +187,7 @@ name | required | type | description | length
 `allDay` | false | boolean | This is a one (or multiple) day event with a duration of a complete day. Default *false*. |
 `deleted` | true | boolean | True if the event has been deleted or cancelled by the organizer. |
 `timeZone` | false | string | Time zone according to the IANA Time Zone Database name. If not set, the calendar time zone will be used. |
-`contacts` | true | object | Contact object or externalId of the Contact.
+`contacts` | true | object | Contact object or externalId of the Contact. |
 `comments` | false | object | Map from email to comment (only for those attendees that have left comments). |
 `overlappable` | true | boolean | An indicator that this event can be overlapped. |
 `created` | true | date | DateTime when the event was created. |
@@ -200,18 +197,19 @@ name | required | type | description | length
 `url` | false | string | Contains the URL for a virtual event. |
 
 #### Slot
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `start` | true | date | DateTime when the slot starts. |
 `end` | true | date | DateTime when the slot ends. |
 `room` | false | string | Room identifier for the event (only for providers (EHRs) handling rooms). |
 `externalId` | true | string | Reference to the original slot ID. |
+`location` | false | string | Event location externalId. |
 
 #### Contact
 This is a transient model that describes the common schema for contacts that Nimblr handles. Notation is taken from CalDAV (see https://tools.ietf.org/html/rfc4791).
 
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original contact object (e.g., Google uses a long UUID). |
 `name` | true | string | Full name of the contact. | 64
 `title` | false | string | Title for the contact (e.g., Mr, Mrs, Count, etc.). | 32
@@ -231,17 +229,17 @@ name | type | description | length
 #### EventType
 This is a transient model that describes the common schema for event types that Nimblr handles.
 
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original event type ID. |
 `name` | true | string | Name of the event type. | 64
-`duration` | false | integer | Duration of the event type in minutes. Default *0*. |
+`duration` | false | integer | Duration of the event type in minutes. Default *0*. Note: If the endpoint to list available slots does not exist, this field becomes mandatory. |
 
 #### Location
 This is a transient model that describes the common schema for locations that Nimblr handles.
 
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original location ID. |
 `name` | true | string | Name of the location. | 64
 `address` | false | string | Address of the location. | 256
@@ -255,8 +253,8 @@ name | type | description | length
 #### Organizer
 This is a transient model that describes the common schema for organizers that Nimblr handles.
 
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original organizer ID. |
 `name` | true | string | Name of the organizer. | 64
 `title` | false | string | Title of the organizer. | 32
@@ -264,12 +262,13 @@ name | type | description | length
 `phone` | false | string | Phone number of the organizer. | 64
 `timezone` | false | string | Time zone according to the IANA Time Zone Database. | 128
 `specialty` | false | string | Specialty of the organizer. | 64
+`location` | false | string | Event location externalId. |
 
 #### Waitlist
 This is a transient model that describes the common schema for waitlists that Nimblr handles.
 
-name | type | description | length
---- | --- | --- | ---
+name | required | type | description | length
+--- | --- | --- | --- | ---
 `externalId` | true | string | Reference to the original waitlist ID. |
 `contacts` | true | object | Contact object or externalId of the Contact. |
 `type` | false | string | Type of event. It's calendar provider-specific. It may not exist for some calendars (e.g., Google/Outlook). It can also be event type (e.g., 'First Visit') or 'BLOCK' for blocking slots. |
