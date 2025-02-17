@@ -26,7 +26,7 @@ The following sections provide detailed information about the methods, objects, 
 Name | Description
 --- | ---
 [`#listCalendars`](#listCalendars) | Retrieves a list of calendars for this EHR.
-[`#listEvents`](#listEvents) | Lists calendar events. `showCancelled` behavior may vary depending on the implementation. Calendar methods will adopt the most restrictive interpretation (minimum number of events).
+[`#listEvents`](#listEvents) | Lists calendar events. This method is crucial for tracking contact events, including those that need confirmation, rescheduling, or have a no-show status. Holly uses this information to manage outbound communication flows effectively.
 [`#listEventsByContact`](#listEventsByContact) | Lists calendar events by contact.
 [`#getEvent`](#getEvent) | Retrieves an event from a calendar.
 [`#insertEvent`](#insertEvent) | Inserts a new event into a calendar.
