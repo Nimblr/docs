@@ -215,18 +215,23 @@ name | required | type | description | length
 `phone` | false | string | Specific phone number for the event. Allows overriding preferences and calendar phone. |
 `url` | false | string | Contains the URL for a virtual event. |
 
+##### Event Status Mapping
+
+The table below outlines the internal status values Holly uses to manage events. This is for reference only and does not limit the possible statuses available in an EHR.
+They help Holly manage communication flows and event processing effectively
+
 status | description
 --- | ---
-NEEDS_ACTION | The Contact has not been contacted
-TENTATIVE | The contact process with the Contact has started
-ACCEPTED | Contact has been contacted and agreed to show up
-BUMPED | Event was cancelled by the organizer
-DECLINED | Contact has declined to attend
-RESCHEDULED | Contact has expressed desire to reschedule
-NOSHOW | Contact did not show up for the event
-PAID | Event has been paid for by the Contact
-UNPAID | Mask that prevents confirmation messages from being sent until an event is paid
-UNKNOWN | To use this status with certain calendars that don't support Contact status or as a default
+NEEDS_ACTION | The Contact has not been contacted.
+TENTATIVE | The contact process with the Contact has started.
+ACCEPTED | Contact has been contacted and agreed to show up.
+BUMPED | Event was cancelled by the organizer.
+DECLINED | Contact has declined to attend.
+RESCHEDULED | Contact has expressed desire to reschedule.
+NOSHOW | Contact did not show up for the event.
+PAID | Event has been paid for by the Contact.
+UNPAID | Mask that prevents confirmation messages from being sent until an event is paid.
+UNKNOWN | To use this status with certain calendars that don't support Contact status or as a default.
 
 #### Slot
 name | required | type | description | length
