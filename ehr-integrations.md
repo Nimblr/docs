@@ -344,7 +344,6 @@ GET /ehr-api/provider/678912345/event/500ABCD001
     id: "500ABCD001",
     scheduled_time: "2025-03-30T12:00:00-0700",
     doctor: 123456789,
-    status: "pending",
     patient: 987654321,
     clinic_room: 2,
     overlap: false,
