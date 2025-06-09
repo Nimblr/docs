@@ -1,4 +1,4 @@
-# Integrations <!-- ========================================================== -->
+# Integration <!-- ========================================================== -->
 
 The calendar module in Nimblr acts as a facade for integrating with external calendar systems, such as EHRs or Google Calendar. It enables Nimblr to manage external events seamlessly, ensuring real-time synchronization and efficient communication with external platforms. This integration allows Nimblr users to manage external events efficiently, reducing manual effort and improving communication with patients.
 
@@ -23,26 +23,27 @@ The following sections provide detailed information about the methods, objects, 
 
 ## Methods <!-- ========================================================== -->
 
-Name | Description
---- | ---
-[`#listCalendars`](#listCalendars) | Retrieves a list of calendars for this EHR.
-[`#listEvents`](#listEvents) | Lists calendar events. This method is crucial for tracking contact events, including those that need confirmation, rescheduling, or have a no-show status. Holly uses this information to manage outbound communication flows effectively.
-[`#listEventsByContact`](#listEventsByContact) | Lists calendar events by contact.
-[`#getEvent`](#getEvent) | Retrieves an event from a calendar.
-[`#insertEvent`](#insertEvent) | Inserts a new event into a calendar.
-[`#patchEvent`](#patchEvent) | Modifies an existing event in a calendar.
-[`#deleteEvent`](#deleteEvent) | Deletes an event from a calendar.
-[`#listAvailableSlots`](#listAvailableSlots) | Lists all available calendar slots in chronological order.
-[`#searchContacts`](#searchContacts) | Retrieves contacts matching the criteria.
-[`#getContact`](#getContact) | Retrieves a contact.
-[`#insertContact`](#insertContact) | Inserts a contact matching the criteria.
-[`#listEventTypes`](#listEventTypes) | Lists calendar event types. Minimum attributes needed: `id` and `name`.
-[`#listLocations`](#listLocations) | Lists locations. Minimum attributes needed: `id` and `name`.
-[`#listOrganizers`](#listOrganizers) | Lists organizers. Minimum attributes needed: `id` and `name`.
-[`#getWaitlist`](#getWaitlist) | Retrieves the waitlist for a specific calendar.
-[`#deleteWaitlist`](#deleteWaitlist) | Deletes a patient from the waitlist.
-[`#uploadInsuranceCard`](#uploadInsuranceCard) | Uploads an insurance card photo for a contact.
-[`#getInsuranceCard`](#getInsuranceCard) | Retrieves the insurance card photo for a contact.
+Name | Description | Priority
+--- | --- | ---
+[`#listCalendars`](#listCalendars) | Retrieves a list of calendars for this EHR. | 1
+[`#listEvents`](#listEvents) | Lists calendar events. This method is crucial for tracking contact events, including those that need confirmation, rescheduling, or have a no-show status. Holly uses this information to manage outbound communication flows effectively. | 1
+[`#listEventsByContact`](#listEventsByContact) | Lists calendar events by contact. | 2
+[`#getEvent`](#getEvent) | Retrieves an event from a calendar. | 1
+[`#insertEvent`](#insertEvent) | Allows the creation of new calendar events, including updates to their description. | 1
+[`#patchEvent`](#patchEvent) | Allows modification of a calendar event, including updates to its description. | 1
+[`#deleteEvent`](#deleteEvent) | Deletes an event from a calendar. | 2
+[`#listAvailableSlots`](#listAvailableSlots) | Lists all available calendar slots in chronological order. Covering all appointment types available. | 2
+[`#searchContacts`](#searchContacts) | Retrieves contacts matching the criteria. Enables searching by SSN, DOB, last name or phone number | 3
+[`#getContact`](#getContact) | Retrieves a contact. | 1
+[`#insertContact`](#insertContact) | Allows for inserting a contact that meets specific criteria, including the option to add a Social Security Number (SSN). | 3
+[`#updateContact`](#updateContact) | Updates existing contact information. | 3
+[`#listEventTypes`](#listEventTypes) | Lists calendar event types. Minimum attributes needed: `id` and `name`. Including all appointment types. | 2
+[`#listLocations`](#listLocations) | Lists locations. Minimum attributes needed: `id` and `name`. | 2
+[`#listOrganizers`](#listOrganizers) | Lists organizers. Minimum attributes needed: `id` and `name`. | 2
+[`#getWaitlist`](#getWaitlist) | Retrieves the waitlist for a specific calendar. | NA
+[`#deleteWaitlist`](#deleteWaitlist) | Deletes a patient from the waitlist. | NA
+[`#uploadInsuranceCard`](#uploadInsuranceCard) | Uploads an insurance card photo for a contact. | NA
+[`#getInsuranceCard`](#getInsuranceCard) | Retrieves the insurance card photo for a contact. | NA
 
 ### #listCalendars
 Retrieves a list of calendars for this EHR.
@@ -76,14 +77,14 @@ To retrieve an event, the `externalId` of the event must be provided.
 Returns @[Event](#Event)
 
 ### #insertEvent
-Inserts a new event into a calendar.
+Inserts a new event into a calendar. It also provides the capability to modify and update associated notes.
 
 This method is used to book a new event in the calendar.
 
 Returns @[Event](#Event)
 
 ### #patchEvent
-Updates the variables of an event (status, comments, etc.).
+Updates the variables of an event (status, comments, notes, etc.).
 
 This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling for patient communication.
 
@@ -95,13 +96,13 @@ Deletes or cancels a specific event.
 Returns @[Boolean](#Boolean)
 
 ### #listAvailableSlots
-Lists all available calendar slots in chronological order.
-To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. If organizers exist, they can additionally be obtained by adding the `externalId` of the organizer and/or the event type in the query.
+Lists all available calendar slots in chronological order, including all appointment types available.
+To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. If organizers exist, they can additionally be obtained by adding the `externalId` of the organizer and/or the event type in the query. 
 
 Returns @[Slot](#Slot)
 
 ### #searchContacts
-Retrieves contacts matching the criteria.
+Retrieves contacts matching the criteria. Enables searching by Social Security Number (SSN), DOB, last name or phone number.
 
 Contact searches are performed when the `externalId` of the contact is unknown. The search can be conducted using parameters such as last name, first name, date of birth, email, or any other parameter that allows for an effective search to obtain a single contact.
 
@@ -109,7 +110,7 @@ Returns @Array[[Contact]](#Contact)
 
 ### #getContact
 Retrieves a contact.
-This method retrieves all the information of a contact using their `externalId`. Unlike the previous method (searchContacts) which is used when the externalId is unknown, this method allows obtaining complete details of the contact, including their name, phone number, and other important parameters necessary to contact them, either by call or SMS.
+This method retrieves all the information of a contact using their `externalId`. Unlike the previous method (searchContacts), which is used when the externalId is unknown, this method allows obtaining complete details of the contact, including their name, phone number, and other important parameters necessary to contact them, either by call or SMS.
 
 Returns @[Contact](#Contact)
 
@@ -119,8 +120,13 @@ This method is used to insert a new contact into the EHR.
 
 Returns @[Contact](#Contact)
 
+### #updateContact
+Updates contact matching the criteria. This method is used to update data of an existing contact into the EHR.
+
+Returns @[Contact](#Contact)
+
 ### #listEventTypes
-Lists calendar event types.
+Lists calendar event types, including all appointment types.
 This method lists the types of calendar events available. It requires a minimum of two attributes: `externalId` and `name`.
 This can be used to map the services that the clinic directly provides within the Electronic Health Record (EHR) system.
 
@@ -198,7 +204,7 @@ name | required | type | description | length
 `location` | false | string | Event location externalId. |
 `room` | false | string | Room identifier for the event (only for EHRs that manage "rooms" as calendars). | 32
 `color` | false | string | Event color. Note that the event colors used for now are: green, yellow, and red. Each implementation will map the colors accordingly. | 16
-`description` | false | string | Full description of the meeting. |
+`description` | false | string | The meeting details will be fully documented here, including a transcript of the conversation. Holly will also append any additional patient information that is not directly mapped to an Electronic Health Record (EHR) field. |
 `organizer` | true | string | Email/externalId of the provider (the Owner of the calendar). |
 `creator` | true | string | Email/externalId of the creator (if the calendar has been delegated, the creator will be the person who created the event). |
 `start` | true | date | DateTime when the event starts in UTC. |
