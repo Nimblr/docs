@@ -130,7 +130,7 @@ Name | Description
 Retrieves a list of calendars for this EHR.
 
 Listing the calendars is important, as it allows using their definitions to manage events. Therefore, the `externalId` of the calendar is used to retrieve the events.
-If needed events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
+If needed, events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
 
 Returns @Array[[Calendar]](#Calendar)
 
@@ -167,7 +167,7 @@ Returns @[Event](#Event)
 ### #patchEvent
 Updates the variables of an event (status, comments, etc.).
 
-This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling from patient's conversation with Holly.
+This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling following patient's conversation with Holly.
 
 Returns @[Event](#Event)
 
@@ -178,7 +178,7 @@ Returns @[Boolean](#Boolean)
 
 ### #listAvailableSlots
 Lists all available calendar slots in chronological order.
-To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. They can additionally be obtained/filtered by adding the `externalId` of the organizer/event type/location in the query.
+To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. They can additionally be obtained or filtered by adding the `externalId` of the organizer/event type/location in the query.
 
 Returns @[Slot](#Slot)
 
@@ -231,7 +231,7 @@ Returns @Array[[Organizer]](#Organizer)
 
 ### #getWaitlist (Optional)
 This method retrieves the waitlist for a specific calendar.
-The waitlist is a list of patients who are waiting for an earliest free slot in the calendar. The waitlist can be used to offer open calendar slots to patients who are waiting for an earlier spot.
+The waitlist is a list of patients who are waiting for an earliest available slot in the calendar. The waitlist can be used to offer open calendar slots to patients who are waiting for an earlier spot.
 
 The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better the offer to move the event to the correct patient.
 
