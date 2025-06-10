@@ -37,7 +37,11 @@ The following sections provide detailed information about the methods, objects, 
 
 **Holly** books incoming calls, texts, and web visits **24/7** while managing follow-ups, rescheduling, and wait-lists automatically. Once configured, she handles two high-level workflows:
 
-1. **Schedule a New Appointment**
+1. **Inbound Appointment Management**, which includes
+   * Scheduling new appointments
+   * Search next patient appointment
+   * Cancellation and Rescheduling patient appointments
+
 2. **Outreach Appointment Management**, which includes
    * Confirmation
    * Cancellation
@@ -50,18 +54,36 @@ Behind the scenes Holly calls the calendar-module endpoints described later in t
 
 ## Core Workflows
 
-### 1  Schedule a New Appointment <!-- ================================================== -->
+### 1  Inbound Appointment Management <!-- ================================================== -->
 
+#### Schedule a New Appointment
 | Step # | Patient / Holly interaction | Calendar-module call(s) |
 |-------:|----------------------------|-------------------------|
 | 1 | **Patient texts** to request a new visit. | — |
 | 2 | Holly asks **“What day works for you?”** and searches for open slots. | [`#listAvailableSlots`](#listavailableslots) |
-| 3 | Holly **identifies or creates the patient**. | [`#searchContacts`](#searchcontacts) / [`#insertContact`](#insertcontact) |
+| 3 | Holly **identifies or creates the patient**. | It is important that the patient can be searched by DOB and social security number [`#searchContacts`](#searchcontacts)  / [`#insertContact`](#insertcontact) |
 | 4 | (Optional) Holly **updates demographics** (e-mail, language, gender…). | [`#updateContact`](#updatecontact) with existing `externalId` |
 | 5 | (Optional) Patient uploads an **insurance-card photo**. | [`#uploadInsuranceCard`](#uploadinsurancecard) |
 | 6 | (Optional) Holly **validates insurance**. | _(If configured, Holly checks whether the patient’s insurance is accepted by the provider.)_ |
 | 7 | Holly **books the appointment**. | [`#insertEvent`](#insertevent) |
 | 8 | (Optional) Holly **adds extra questions/notes**. | [`#patchEvent`](#patchevent) |
+
+#### Search next patient appointment
+| Step # | Patient / Holly interaction | Calendar-module call(s) |
+|-------:|----------------------------|-------------------------|
+| 1 | **Patient texts** to request to find their next visit. | — |
+| 2 | Holly **identifies the patient**. | It is important that the patient can be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
+| 3 | Holly searches **next patient appointment**. | [`#listEventsByContact`](#listEventsByContact) queried by patient `externalId` |
+
+#### Cancellation and Rescheduling patient appointments
+| Step # | Patient / Holly interaction | Calendar-module call(s) |
+|-------:|----------------------------|-------------------------|
+| 1 | **Patient texts** to request to find their next visit. | — |
+| 2 | Holly **identifies the patient**. | It is important that the patient can be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
+| 3 | Holly searches **patient appointments**. | [`#listEventsByContact`](#listEventsByContact) queried by patient `externalId` |
+| 4 | Holly asks **“What day works for you?”** and searches for open slots. | [`#listAvailableSlots`](#listavailableslots) |
+| 5 | Holly **books the appointment**. | [`#insertEvent`](#insertevent) |
+| 6 | (Optional) Holly **adds conversation notes**. | [`#patchEvent`](#patchevent) |
 
 ---
 
