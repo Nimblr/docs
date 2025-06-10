@@ -8,18 +8,99 @@ It is essential to frequently consult the real calendar to ensure updates (new e
 
 Nimblr’s API can map any “external” object into a Nimblr object. An external object can be in JSON or XML format.
 
+This document describes:
+
+* **Application overview & core workflows** Holly automates.
+* **API methods** exposed by the calendar module.
+* **Canonical object models** (Event, Contact, Slot, etc.).
+* **A concrete mapping example** from an external EHR payload → Nimblr’s internal schema.
+* **Glossary** of key terms.
+
 ----
 ## Index
 
 The following sections provide detailed information about the methods, objects, and examples available in the calendar module. Use the links below to navigate to the relevant section.
 
-[`Methods`](#Methods-)
+| Section | Description |
+|---------|-------------|
+| [Application Overview](#application-overview) | High-level product description. |
+| [Core Workflows](#core-workflows) | How Holly orchestrates patient flows and which API methods she calls. |
+| [Synchronization Processes](#synchronization-processes) | Background jobs that keep Nimblr & EHR in sync |
+| [Methods](#methods) | Reference for every `#method` endpoint |
+| [Objects](#objects) | Data-model reference for Calendar, Event, Contact, etc. |
+| [Example](#example) | End-to-end JSON mapping walkthrough. |
+| [Glossary](#glossary) | Definitions of common terms used in this doc. |
 
-[`Objects`](#Objects-)
+---
 
-[`Method Request Example`](#Example-)
+## Application Overview
 
-[`Glossary`](#Glossary-)
+**Holly** books incoming calls, texts, and web visits **24/7** while managing follow-ups, rescheduling, and wait-lists automatically. Once configured, she handles two high-level workflows:
+
+1. **Schedule a New Appointment**
+2. **Outreach Appointment Management**, which includes
+   * Confirmation
+   * Cancellation
+   * Rescheduling of (a) patient-canceled appointments, (b) provider-canceled “bumps”, and (c) no-shows
+   * Waitlist
+
+Behind the scenes Holly calls the calendar-module endpoints described later in this doc. The next section shows the step-by-step mapping.
+
+---
+
+## Core Workflows
+
+### 1  Schedule a New Appointment <!-- ================================================== -->
+
+| Step # | Patient / Holly interaction | Calendar-module call(s) |
+|-------:|----------------------------|-------------------------|
+| 1 | **Patient texts** to request a new visit. | — |
+| 2 | Holly asks **“What day works for you?”** and searches for open slots. | [`#listAvailableSlots`](#listavailableslots) |
+| 3 | Holly **identifies or creates the patient**. | [`#searchContacts`](#searchcontacts) / [`#insertContact`](#insertcontact) |
+| 4 | (Optional) Holly **updates demographics** (e-mail, language, gender…). | [`#updateContact`](#updatecontact) with existing `externalId` |
+| 5 | (Optional) Patient uploads an **insurance-card photo**. | [`#uploadInsuranceCard`](#uploadinsurancecard) |
+| 6 | (Optional) Holly **validates insurance**. | _(If configured, Holly checks whether the patient’s insurance is accepted by the provider.)_ |
+| 7 | Holly **books the appointment**. | [`#insertEvent`](#insertevent) |
+| 8 | (Optional) Holly **adds extra questions/notes**. | [`#patchEvent`](#patchevent) |
+
+---
+
+### 2  Outreach Appointment Management <!-- ===================================== -->
+
+Every 20-40 min Holly polls upcoming events (2-14 days out, configurable) and triggers outbound SMS flows according to event status or patient answers.
+
+| Sub-workflow | Trigger condition | Key calendar-module calls |
+|--------------|------------------|---------------------------|
+| **Confirmation** | A new event is added. | [`#listEvents`](#listEvents), [`#getEvent`](#getevent) → [`#patchEvent`](#patchevent) |
+| **Cancellation** | Patient **Declines** appointment confirmation reminder. | [`#patchEvent`](#patchevent) |
+| **Reschedule — After Patient cancellation** | Patient cancels inside confirmation thread and wants to reschedule. | [`#listAvailableSlots`](#listavailableslots) → [`#patchEvent`](#patchEvent) → [`#insertEvent`](#insertEvent) |
+| **Reschedule — Bump** | Provider cancels the appointment in the calendar with a Bumped status and the patient wants to reschedule (`status == BUMPED`). | [`#listEvents`](#listEvents), [`#getEvent`](#getevent) → [`#patchEvent`](#patchEvent) → [`#listAvailableSlots`](#listAvailableSlots) → [`#insertEvent`](#insertEvent) |
+| **Reschedule — No-show** | The provider change the appointment status when the patient no shows to the appointment (`status == NOSHOW`). | [`#listEvents`](#listEvents), [`#getEvent`](#getevent) → [`#patchEvent`](#patchEvent) → [`#listAvailableSlots`](#listavailableslots) → [`#insertEvent`](#insertEvent) |
+| **Waitlist Offer** | When a patient cancels, the free slot is offered next patient in the waitlist | [`#getWaitlist`](#getWaitlist), [`#insertEvent`](#insertEvent), [`#deleteWaitlist`](#deleteWaitlist) |
+
+
+> **Why `#getEvent` and`#patchEvent` matters** — Holly never overwrites existing data blindly; she first **GETs** the latest event information, merges changes, then **PATCHes**—preventing race conditions with clinic staff who may be editing the same record.
+
+---
+
+## Synchronization Processes <!-- ========================================================== -->
+
+Nimblr runs background jobs that keep our local state aligned with each connected EHR.
+
+| Process | Frequency | Purpose | **Key calendar-module methods** |
+|---------|-----------|---------|---------------------------------|
+| **Login / Refresh Token** | Every 12 h | Renew OAuth/refresh tokens | — |
+| **Last-Modified Sync** | (When memory algorithms are required) Queue checked every 20 s; each account synced every 10 min (configurable) | Pull last event updates | [`#listEvents`](#listEvents) |
+| **Daily Sync** | (When memory algorithms are required) Every 24 h | Full DB update (next 60 days future + 30 days past) | [`#listEvents`](#listEvents) |
+| **Insert New Appointment** | Once per patient conversation | Lookup/create patient & book event | [`#searchContacts`](#searchContacts), [`#insertContact`](#insertContact), [`#updateContact`](#updateContact), [`#insertEvent`](#insertEvent) |
+| **Handle No-show** | When a NOSHOW appointment status detected | Update notes, status | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent), [`#getContact`](#getContact) |
+| **Handle Cancellation** | When cancellation detected | Update notes, status | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent), [`#getContact`](#getContact) |
+| **Confirm Appointment** | For each confirmed event | Mark confirmed | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent) |
+| **Validate Event Details** | Before updating an  event | Ensure status/date/time/notes current.  | [`#getEvent`](#getEvent) |
+| **Lookup Providers, Locations, Appointment Types** | On setup page & per booking | Populate event metadata. When customer logs into Nimblr's UI to set Holly preferences. | [`#listOrganizers`](#listOrganizers), [`#listLocations`](#listLocations), [`#listEventTypes`](#listEventTypes) |
+| **Waitlist Offer** | When cancellation frees a slot | Offer slot to next patient | [`#getWaitlist`](#getWaitlist), [`#insertEvent`](#insertEvent), [`#deleteWaitlist`](#deleteWaitlist) |
+
+---
 
 ## Methods <!-- ========================================================== -->
 
@@ -36,6 +117,7 @@ Name | Description
 [`#searchContacts`](#searchContacts) | Retrieves contacts matching the criteria.
 [`#getContact`](#getContact) | Retrieves a contact.
 [`#insertContact`](#insertContact) | Inserts a contact matching the criteria.
+[`#updateContact`](#updateContact) | Updates contact information.
 [`#listEventTypes`](#listEventTypes) | Lists calendar event types. Minimum attributes needed: `id` and `name`.
 [`#listLocations`](#listLocations) | Lists locations. Minimum attributes needed: `id` and `name`.
 [`#listOrganizers`](#listOrganizers) | Lists organizers. Minimum attributes needed: `id` and `name`.
@@ -48,7 +130,7 @@ Name | Description
 Retrieves a list of calendars for this EHR.
 
 Listing the calendars is important, as it allows using their definitions to manage events. Therefore, the `externalId` of the calendar is used to retrieve the events.
-If events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
+If needed events can be obtained using the `externalId` of the organizer or the `externalId` of the location, these can be used if the concept of a calendar does not exist in the EHR.
 
 Returns @Array[[Calendar]](#Calendar)
 
@@ -85,7 +167,7 @@ Returns @[Event](#Event)
 ### #patchEvent
 Updates the variables of an event (status, comments, etc.).
 
-This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling for patient communication.
+This method is used to update the status of an event. It is important to update the event status to reflect confirmation, cancellation, or rescheduling from patient's conversation with Holly.
 
 Returns @[Event](#Event)
 
@@ -96,14 +178,14 @@ Returns @[Boolean](#Boolean)
 
 ### #listAvailableSlots
 Lists all available calendar slots in chronological order.
-To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. If organizers exist, they can additionally be obtained by adding the `externalId` of the organizer and/or the event type in the query.
+To retrieve available slots, the method must be queried by calendar `externalId` within a specified time period. They can additionally be obtained/filtered by adding the `externalId` of the organizer/event type/location in the query.
 
 Returns @[Slot](#Slot)
 
 ### #searchContacts
 Retrieves contacts matching the criteria.
 
-Contact searches are performed when the `externalId` of the contact is unknown. The search can be conducted using parameters such as last name, first name, date of birth, email, or any other parameter that allows for an effective search to obtain a single contact.
+Contact searches are performed when the `externalId` of the contact is unknown. The search can be conducted using parameters such as SSN, last name, first name, date of birth, phone, email, or any other parameter that allows for an effective search to obtain a single contact.
 
 Returns @Array[[Contact]](#Contact)
 
@@ -119,9 +201,16 @@ This method is used to insert a new contact into the EHR.
 
 Returns @[Contact](#Contact)
 
+### #updateContact
+Updates contact information (email, language, gender).
+
+This method updates contact information using their `externalId`. The information is updated when the user enables Holly to update the contact information.
+
+Returns @[Contact](#Contact)
+
 ### #listEventTypes
 Lists calendar event types.
-This method lists the types of calendar events available. It requires a minimum of two attributes: `externalId` and `name`.
+This method lists the event types available to be provided. It requires a minimum of two attributes: `externalId` and `name`.
 This can be used to map the services that the clinic directly provides within the Electronic Health Record (EHR) system.
 
 Returns @Array[[EventType]](#EventType)
@@ -142,9 +231,9 @@ Returns @Array[[Organizer]](#Organizer)
 
 ### #getWaitlist (Optional)
 This method retrieves the waitlist for a specific calendar.
-The waitlist is a list of patients who are waiting for an event. The waitlist can be used to offer open calendar slots to patients who are waiting for an earlier event.
+The waitlist is a list of patients who are waiting for an earliest free slot in the calendar. The waitlist can be used to offer open calendar slots to patients who are waiting for an earlier spot.
 
-The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better the offer to advance the event to the correct patient.
+The waitlist can be queried by calendar, organizer, location, or event type using the `externalId` of any or all of these parameters. The more refined the search, the better the offer to move the event to the correct patient.
 
 Returns @Array[[Waitlist]](#Waitlist)
 
