@@ -72,18 +72,19 @@ Behind the scenes Holly calls the calendar-module endpoints described later in t
 | Step # | Patient / Holly interaction | Calendar-module call(s) |
 |-------:|----------------------------|-------------------------|
 | 1 | **Patient texts** to request to find their next visit. | — |
-| 2 | Holly **identifies the patient**. | It is important that the patient can be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
+| 2 | Holly **identifies the patient**. | Patients must be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
 | 3 | Holly searches **next patient appointment**. | [`#listEventsByContact`](#listEventsByContact) queried by patient `externalId` |
 
 #### Cancellation and Rescheduling patient appointments
 | Step # | Patient / Holly interaction | Calendar-module call(s) |
 |-------:|----------------------------|-------------------------|
-| 1 | **Patient texts** to request to find their next visit. | — |
-| 2 | Holly **identifies the patient**. | It is important that the patient can be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
+| 1 | **Patient texts** to request to cancel/reschedule an appointment. | — |
+| 2 | Holly **identifies the patient**. | Patients must be searched by DOB and social security number [`#searchContacts`](#searchcontacts) |
 | 3 | Holly searches **patient appointments**. | [`#listEventsByContact`](#listEventsByContact) queried by patient `externalId` |
-| 4 | Holly asks **“What day works for you?”** and searches for open slots. | [`#listAvailableSlots`](#listavailableslots) |
-| 5 | Holly **books the appointment**. | [`#insertEvent`](#insertevent) |
-| 6 | (Optional) Holly **adds conversation notes**. | [`#patchEvent`](#patchevent) |
+| 4 | The patient choose to cancel or reschedule the appointment | [`#patchEvent`](#patchevent) using the `externalId` of the event |
+| 5 | Holly asks **“What day works for you?”** and searches for open slots. When patient choose to reschedule  | [`#listAvailableSlots`](#listavailableslots) |
+| 6 | Holly **books the appointment**. | [`#insertEvent`](#insertevent) |
+| 7 | (Optional) Holly **adds conversation notes**. | [`#patchEvent`](#patchevent) |
 
 ---
 
@@ -112,9 +113,7 @@ Nimblr runs background jobs that keep our local state aligned with each connecte
 | Process | Frequency | Purpose | **Key calendar-module methods** |
 |---------|-----------|---------|---------------------------------|
 | **Login / Refresh Token** | Every 12 h | Renew OAuth/refresh tokens | — |
-| **Last-Modified Sync** | (When memory algorithms are required) Queue checked every 20 s; each account synced every 10 min (configurable) | Pull last event updates | [`#listEvents`](#listEvents) |
-| **Daily Sync** | (When memory algorithms are required) Every 24 h | Full DB update (next 60 days future + 30 days past) | [`#listEvents`](#listEvents) |
-| **Insert New Appointment** | Once per patient conversation | Lookup/create patient & book event | [`#searchContacts`](#searchContacts), [`#insertContact`](#insertContact), [`#updateContact`](#updateContact), [`#insertEvent`](#insertEvent) |
+| **Insert New Appointment** | Once per Booking or Rescheduling conversation with a patient. | Lookup/create patient & book event | [`#searchContacts`](#searchContacts), [`#insertContact`](#insertContact), [`#updateContact`](#updateContact), [`#insertEvent`](#insertEvent) |
 | **Handle No-show** | When a NOSHOW appointment status detected | Update notes, status | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent), [`#getContact`](#getContact) |
 | **Handle Cancellation** | When cancellation detected | Update notes, status | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent), [`#getContact`](#getContact) |
 | **Confirm Appointment** | For each confirmed event | Mark confirmed | [`#getEvent`](#getEvent), [`#patchEvent`](#patchEvent) |
